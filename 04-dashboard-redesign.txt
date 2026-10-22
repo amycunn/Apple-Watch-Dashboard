@@ -1,0 +1,162 @@
+Rebuild ~/Projects/health-brief/dashboard.html from scratch.
+
+STEP 1 — LOAD DATA:
+- Run parse_health.py — read the latest JSON from
+  ~/Library/Mobile Documents/com~apple~CloudDocs/HealthData/
+- Fetch yesterday's workout from Hevy API (HEVY_API_KEY in .env)
+- Read last 8 weekly JSON files for volume history
+- Compute readiness score: sleep 40% + HRV 40% + RHR 20%
+  Normalise each metric against the last 7 days of data (0–100 scale)
+
+STEP 2 — BUILD THE DASHBOARD:
+
+DESIGN SYSTEM:
+- Page background: #EEF2F7
+- Cards: #FFFFFF, border-radius 16px,
+  box-shadow 0 2px 8px rgba(0,0,0,0.06), padding 24px
+- Accent green: #CDEA3C
+- Accent yellow: #F5C54A
+- Accent blue: #B8D4E8
+- Text primary: #1A1A1A, secondary: #888888
+- Font: -apple-system, system font stack
+- Grid gap: 16px
+- Status badges: rounded pill, font-size 13px, font-weight 600
+
+─────────────────────────────────────────
+SECTION 1: PAGE HEADER (full width, no card)
+
+Left: "[Your Name]'s Health Dashboard" — 28px bold #1A1A1A
+Right: today's date (e.g. "Saturday, July 18") — 14px #888
+Margin bottom 8px
+
+─────────────────────────────────────────
+SECTION 2: PROFILE STRIP (full width white card, ~90px tall)
+
+Layout: horizontal flex, vertically centered, space between
+
+FAR LEFT:
+- Circular photo from ./profile.jpg
+  64px × 64px, object-fit: cover, border-radius 50%
+  border: 2.5px solid #CDEA3C
+
+LEFT-CENTER:
+- "[Your Name]" — 18px bold #1A1A1A
+- "[Your tagline]" — 13px #888
+
+CENTER: three stat pills in a row (each: #F5F5F5 bg,
+  border-radius 10px, padding 8px 16px, text-align center)
+  12px uppercase #888 label on top, 16px bold #1A1A1A value below:
+  [Weight: X kg]  [Height: X cm]  [Age: X yrs]
+
+FAR RIGHT:
+- Readiness score large number (computed %) in #CDEA3C if ≥70,
+  #F5C54A if 50–69, #FF6B6B if <50 — 36px bold
+- "Daily Readiness" — 11px #888 below it
+
+─────────────────────────────────────────
+SECTION 3: 3-COLUMN GRID (align-items: stretch)
+
+LEFT COLUMN (30% width):
+
+Card A — PROGRESS (white, stretches full column height)
+  "Progress" 16px bold + "This Week" pill (#CDEA3C) — header row
+  Ring chart: 3 concentric SVG donuts centered, 200px wide
+    Outer ring: Sleep Quality score — #B8D4E8
+    Middle ring: HRV Balance score — #F5C54A
+    Inner ring: Muscle Recovery — #CDEA3C
+    Background rings: #F0F0F0
+  Below chart, 3 progress rows (label left, % right, bar full width):
+    • Sleep Quality  XX%  bar color #B8D4E8
+    • HRV Balance    XX%  bar color #F5C54A
+    • Muscle Recovery XX% bar color #CDEA3C
+    Each bar: 6px tall, background #F0F0F0, border-radius 3px
+  Sub-line per row: real data explanation (e.g. "7.0h vs 8h target")
+  Small footnote at bottom: "Scores normalised against last 7 days"
+
+MIDDLE COLUMN (35% width, two stacked cards):
+
+Card B — HEART RATE VARIABILITY
+  Background: #CDEA3C (lime green, full card)
+  Heart SVG icon (line style, 20px) + "Heart Rate Variability" —
+    bold header, color #1A1A1A
+  Large number: XX ms — 56px bold #1A1A1A
+  Status badge: white pill — "Above Baseline" / "At Baseline" / "Low"
+  Tagline: one line contextual (e.g. "Recovery is solid.
+    Ready to train.") — 15px #2D3A00
+  ECG SVG line chart: full width, 80px tall, black stroke 2px,
+    no fill, no axes — 7 spikes using real daily HRV values
+    (normalise to fit the 80px height)
+  Caption: "Spike height = daily HRV avg, last 7 days" — 11px #2D3A00
+
+Card C — SLEEP LAST NIGHT
+  Background: #B8D4E8 (light blue, full card)
+  Moon SVG icon + "Sleep Last Night" — bold header #1A1A1A
+  Large number: X.Xhr — 56px bold
+  Status badge: white pill — "Restorative" / "Moderate" / "Poor"
+  Progress bar: white track full width, white fill at sleep% of 9h max
+    opacity: filled section 1.0, empty section 0.3
+  Deep Xhr · REM Xhr · Awake Xhr — 13px bold #1A1A1A
+  Data note if missing: "Syncing from [date] —
+    next update at 6am" in 12px #1A1A1A
+
+RIGHT COLUMN (35% width, two stacked cards):
+
+Card D — TODAY'S ACTIVITY (white)
+  "Today's Activity" + activity type pill (#CDEA3C) — header row
+  Workout name: 28px bold — e.g. "Upper Body Strength"
+  4 stat boxes in a 2×2 grid (#F5F5F5 bg, border-radius 10px):
+    [Intensity: ~70%]  [Duration: 45–60 min]
+    [Focus: Chest]     [Energy: Moderate]
+  Bullet list (3 items, 14px, line-height 1.8):
+    Specific recommendations based on sleep + HRV + Hevy data
+    (e.g. "Chest fully recovered at 6.6 days — lead with it")
+
+Card E — DAILY STATS (white)
+  "Daily Stats" — 16px bold header
+  2×2 grid, each cell white #F8F8F8 bg border-radius 10px, padding 12px:
+    [Resting HR: XX bpm / +X vs avg]
+    [Steps: XX,XXX / today so far]
+    [Sleep Score: XX / vs 7-day range]
+    [Training Load: XXX% / this week vs 4-week avg]
+  Training Load cell: if >150% → text #C62828 +
+    "Overreaching risk" sub-label
+    if 130–150% → text #E65100 + "High load — monitor"
+    if <130% → text #2E7D32
+
+─────────────────────────────────────────
+SECTION 4: BOTTOM ROW (two cards, 50/50, full width)
+
+Card F — LAST WORKOUT (white)
+  "Last Workout" bold + "Hevy" right-aligned in #888 — header
+  Workout name: 20px bold (e.g. "Full Body B")
+  Date + time: 13px #888
+  3 stat pills: [Duration: 51 min] [Sets: 14] [Volume: 8,133 kg]
+  Top exercises list (up to 5): exercise name left,
+    weight×sets×reps right in #888
+  Muscle recovery dots row:
+    one labeled circle per muscle group trained
+    Red #FF6B6B = <48h, Amber #F5C54A = 48–72h,
+    Green #CDEA3C = 72h+ (fully recovered)
+
+Card G — WEEKLY VOLUME (white)
+  "Weekly Volume" bold + "8 Weeks" right in #888 — header
+  SVG bar chart, 240px tall, full width:
+    8 vertical bars (one per week), fill #CDEA3C
+    Current week bar: slightly darker #A8C820
+    Dashed horizontal average line: stroke #999 stroke-dasharray 4,4
+    X-axis: week start date labels in 11px #888
+    Y-axis: kg labels left in 11px #888
+    If fewer than 8 weeks of data, show available weeks
+    and leave remaining bars as empty outlines
+  Below chart: "This week: Xkg · 4-week avg: Xkg"
+    + trend badge (↑↓ X%)
+
+─────────────────────────────────────────
+STEP 3:
+- All numbers must be real data — no placeholders
+- If a metric is unavailable, show "—" and a sync note
+- Inject all computed values directly into the HTML as static data
+- Smooth page load: cards fade in with 0.3s stagger
+  (opacity 0 → 1, translateY 8px → 0)
+- Save to ~/Projects/health-brief/dashboard.html
+- Open in default browser when complete

@@ -1,0 +1,52 @@
+Build me a daily health dashboard as a single HTML file saved to
+~/Projects/health-brief/dashboard.html
+
+Run parse_health.py first to get today's metrics, then read the last
+7 HealthData JSON files to build trend data. Inject all values
+directly into the HTML as static data.
+
+Design: Apple Liquid Glass aesthetic — minimal, 2026 visionOS/iOS style.
+
+Visual spec:
+- Background: deep navy-to-indigo gradient (#0a0a1a → #1a1040)
+- Frosted glass cards: backdrop-filter blur(24px),
+  background rgba(255,255,255,0.08),
+  border 1px solid rgba(255,255,255,0.15),
+  border-radius 20px, box-shadow 0 8px 32px rgba(0,0,0,0.3)
+- Font: -apple-system, SF Pro Display — use system font stack
+- Accent colors: white primary text, rgba(255,255,255,0.5) secondary,
+  mint #5AC8FA for good metrics, amber #FFD60A for caution,
+  red #FF453A for low/bad
+- No borders on the page itself — cards float on the gradient
+
+Layout (single page, no scroll):
+Top bar: date + "Good morning" greeting, today's overall status
+  dot (green/amber/red based on combined signals)
+
+Row 1 — three equal glass cards:
+  [Sleep] large number (hrs), small breakdown
+    (REM / Deep / Core), 7-day sparkline underneath
+  [HRV] large number (ms), delta vs personal baseline as
+    a badge (e.g. "↓12%"), 7-day sparkline
+  [Resting HR] large number (bpm), trend arrow, 7-day sparkline
+
+Row 2 — full-width glass card:
+  "Today's plan" — the adjustment recommendation in plain language,
+  large clean text, icon on the left (use a simple SVG:
+  dumbbell for workout, moon for recovery, zap for green light)
+
+Row 3 — two cards:
+  [Last workout] type + duration + avg HR if available from JSON
+  [7-day trend insight] one sentence Claude generates from the
+    trend data — e.g. "HRV has been climbing since Thursday"
+
+Sparklines: pure SVG, no chart libraries, 40px tall,
+  mint color, no axes, just the line
+
+Animate on load: cards fade in with 0.3s stagger,
+  translateY(12px) → translateY(0)
+
+Make it look like something you'd see in an Apple keynote demo.
+Clean. Airy. Real data only — no placeholder text.
+
+Open the file in the default browser when done.

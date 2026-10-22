@@ -1,0 +1,44 @@
+Run my morning health brief with full Hevy integration.
+
+Step 1 — Load data:
+- Read the latest JSON from ~/Library/Mobile Documents/com~apple~CloudDocs/HealthData/
+- Read my Hevy workout data (API or CSV, whichever is configured)
+- Find the most recent workout and the one before it
+
+Step 2 — Parse and reason:
+Extract these values:
+- Total sleep, deep sleep, REM (hours)
+- HRV (ms) + calculate % vs my 30-day average from past files
+- Resting heart rate
+- Last workout: name, date, muscle groups hit, total volume (kg),
+  heaviest compound lift
+- Days since last trained each muscle group
+
+Apply the adjustment logic in CLAUDE.md. Cross-reference:
+- If muscle group was trained <48h ago → flag for recovery
+- If sleep <6h AND volume was high yesterday → full rest
+- If HRV down + high recent training load → deload signal
+
+Step 3 — Generate dashboard.html:
+
+Apple Liquid Glass design (as already specified).
+
+Add a fourth glass card row for Hevy data:
+[Last Workout] — workout name + date, top 3 exercises with
+  weight×sets×reps, total volume badge, muscle group icons
+  (use simple SVG circles colored by recovery status:
+  red = <48h, amber = 48-72h, green = 72h+)
+
+Update "Today's plan" card to use combined signals:
+- What to train (or not) based on recovery map + sleep + HRV
+- Specific suggestion: e.g. "Pull day — back/biceps are
+  fully recovered. Keep intensity at 80% given sleep deficit."
+
+Add one new insight to the 7-day trend card:
+- Training frequency this week vs last week
+- Whether volume is trending up, flat, or down
+
+Step 4 — Save and open:
+Save to ~/Projects/health-brief/dashboard.html
+Open in default browser.
+Print a 5-line text summary to the terminal as well.

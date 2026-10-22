@@ -1,0 +1,45 @@
+# Daily Health Brief
+
+## What this project does
+Each morning, read the latest health export from Apple Watch and generate
+a personalized daily adjustment brief.
+
+## Data location
+Health data exports live at: ~/Library/Mobile Documents/com~apple~CloudDocs/HealthData/
+Files are named: HealthData_YYYY-MM-DD.json
+Always read the most recent file.
+
+## How to run
+When I say "morning brief" or "run brief", do the following:
+1. Find and read the latest JSON file in the HealthData folder
+2. Run parse_health.py to extract yesterday's key metrics
+3. Apply the adjustment logic below
+4. Output today's brief in plain language
+
+## Adjustment logic
+
+### Sleep rules
+- Under 6h total sleep → skip strength training, max 20 min Zone 2 cardio,
+  push deep focus work to afternoon (post-2pm)
+- 6–7h → reduce workout intensity by ~30%, no heavy compound lifts
+- 7h+ → proceed with planned workout
+
+### HRV rules (personal baseline: set this once you know your avg)
+- HRV more than 20% below your 30-day average → recovery day only
+  (walk, stretch, no structured workout)
+- HRV 10–20% below average → reduce volume by half
+- HRV at or above average → green light
+
+### Combined signals
+- Bad sleep AND low HRV → full rest day, flag for tomorrow
+- Good sleep AND low HRV → light day, investigate stress/illness
+- Bad sleep AND normal HRV → modified day (body recovered, brain tired)
+
+## Output format
+Plain text, 5 lines max:
+
+**Sleep:** [X hrs | quality summary]
+**HRV:** [X ms | vs baseline]
+**Today's plan:** [specific recommendation]
+**Watch for:** [one flag if anything looks off, otherwise omit]
+**Trend:** [one sentence if a pattern is emerging over last 3–5 days]
